@@ -1,6 +1,6 @@
 import vrep
 import time
-
+import math
 
 
 def prin(pos,ori):
@@ -8,7 +8,7 @@ def prin(pos,ori):
 		print (pos)
 		print ("Angle= ", ori[2])
 
-def stright():
+def straight():
 	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 1,vrep.simx_opmode_streaming)
 	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 1,vrep.simx_opmode_streaming)
 
@@ -26,13 +26,47 @@ returnCode,rightMotor =vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx_rightMoto
 returnCode,robot_handle =vrep.simxGetObjectHandle(clientID,'Pioneer_p3dx',vrep.simx_opmode_blocking)
 returnCode, pos=vrep.simxGetObjectPosition(clientID, robot_handle, -1, vrep.simx_opmode_streaming)
 returnCode, ori=vrep.simxGetObjectOrientation(clientID, robot_handle, -1, vrep.simx_opmode_streaming)
-x=5
+x=0.5
 y=5
 lm=1
 rm=1
 
+returnCode, ori=vrep.simxGetObjectOrientation(clientID, robot_handle, -1, vrep.simx_opmode_buffer)
+slope = (y-pos[1])/(x-pos[0])
+theta = math.atan(slope)
+print('theta=',theta)
+print('ori=',ori[2])
 
-slope = (x-pos[0])/(y-pos[1])
+if (theta<0):
+	lm=0
+	rm=1
+	t = -1*0.06*theta/(2*3.14*0.0275)
+	print('t=',t)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 0,vrep.simx_opmode_streaming)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 1,vrep.simx_opmode_streaming)
+	time.sleep(t)
+	lm=0
+	rm=0
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 0,vrep.simx_opmode_streaming)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 0,vrep.simx_opmode_streaming)
+	time.sleep(0.5)
+elif (theta>0):
+	lm=1
+	rm=0
+	t = 1*0.06*theta/(2*3.14*0.0275)
+	print('t=',t)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 1,vrep.simx_opmode_streaming)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 0,vrep.simx_opmode_streaming)
+	time.sleep(t)
+	lm=0
+	rm=0
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 0,vrep.simx_opmode_streaming)
+	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 0,vrep.simx_opmode_streaming)
+	time.sleep(0.5)
+
+returnCode, ori=vrep.simxGetObjectOrientation(clientID, robot_handle, -1, vrep.simx_opmode_buffer)
+print ('ori=',ori[2])
+'''
 while(pos[0]<5.3   and  pos[1]<5.3):
 	ac_slope = (x-pos[0])/(y-pos[1])
 	if (ac_slope>=slope):
@@ -53,4 +87,4 @@ while(pos[0]<5.3   and  pos[1]<5.3):
 returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, 0,vrep.simx_opmode_streaming)
 returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor, 0,vrep.simx_opmode_streaming)
 	
-
+'''
