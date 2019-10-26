@@ -7,19 +7,28 @@ import threading
 delay = 0.1
 
 def check_collision(sensor):
-	maxd=0.2   ###clearance from the obstacle
-	mind=0.05
+	maxd=0.5   ###clearance from the obstacle
+	mind=0.2
 	detect=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-	braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-	v = 1  ###motor speed
+	braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 1.6,1.4,1.2,1,0.8,0.6,0.4,0.2]
+	braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.2,0.4,0.6,0.8,1,1.2,1.4,1.6]
+	# braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+	# braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+	v = 1  ###motor speed from the bot function
 	for i in range(16):
 
 		Code,State,Point,ObjectHandle,SurfaceNormalVector=vrep.simxReadProximitySensor(clientID,sensor[i],vrep.simx_opmode_streaming)
 		Code,State,Point,ObjectHandle,SurfaceNormalVector=vrep.simxReadProximitySensor(clientID,sensor[i],vrep.simx_opmode_buffer)
-		time.sleep(0.1)
-		dist = math.sqrt(Point[0]**2 + Point[1]**2 + Point[2]**2)
-		if (dist < maxd):
+		# time.sleep(0.1)
+		# detect[i] = 0
+		# print("point = ",Point)
+		# dist = math.sqrt(Point[0]**2 + Point[1]**2 + Point[2]**2)
+		dist = math.sqrt(Point[0]**2 + Point[2]**2)
+
+		# if (dist < maxd and State != 1):
+		if ((State != 0) and (dist < maxd)):
+			# print("yes %d",i)
+			# print("dist x ,z ",Point[0], Point[2])
 			if(dist < mind):
 				dist = mind
 			detect[i] = 1 - ((dist - mind)/(maxd - mind))
@@ -91,9 +100,9 @@ def bot1(clientID):
 	# time.sleep(0.5)
 	print("ENtered bot1 done ori")
 	while(pos[0]<x*1.05   and  pos[1]<y*1.05):
-		returnCode,pos=vrep.simxGetObjectPosition(clientID, robot_handle, -1, vrep.simx_opmode_buffer)
+		returnCode,pos=vrep.simxGetObjectPosition(clientID, robot_handle, 1, vrep.simx_opmode_buffer)
 		time.sleep(delay)
-		returnCode,ori=vrep.simxGetObjectOrientation(clientID, robot_handle, -1, vrep.simx_opmode_buffer)
+		returnCode,ori=vrep.simxGetObjectOrientation(clientID, robot_handle, 1, vrep.simx_opmode_buffer)
 		time.sleep(delay)
 		v_left, v_right = check_collision(sensor)
 		returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor, v_left,vrep.simx_opmode_streaming)
@@ -158,9 +167,9 @@ def bot2(clientID):
 	# time.sleep(0.5)
 	print("ENtered bot2 done ori")
 	while(pos1[0]<x*1.05   and  pos1[1]<y*1.05):
-		returnCode,pos1=vrep.simxGetObjectPosition(clientID, robot_handle1, -1, vrep.simx_opmode_buffer)
+		returnCode,pos1=vrep.simxGetObjectPosition(clientID, robot_handle1, 1, vrep.simx_opmode_buffer)
 		time.sleep(delay)
-		returnCode,ori1=vrep.simxGetObjectOrientation(clientID, robot_handle1, -1, vrep.simx_opmode_buffer)
+		returnCode,ori1=vrep.simxGetObjectOrientation(clientID, robot_handle1, 1, vrep.simx_opmode_buffer)
 		time.sleep(delay)
 		v_left, v_right = check_collision(sensor)
 		returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor1, v_left, vrep.simx_opmode_streaming)
