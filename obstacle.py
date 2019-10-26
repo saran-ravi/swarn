@@ -9,16 +9,25 @@ def check_collision(sensor):
 	maxd=0.5   ###clearance from the obstacle
 	mind=0.2
 	detect=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-	braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-	braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
-	v = 2  ###motor speed
+	braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 1.6,1.4,1.2,1,0.8,0.6,0.4,0.2]
+	braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.2,0.4,0.6,0.8,1,1.2,1.4,1.6]
+	# braitenbergL=[-0.2,-0.4,-0.6,-0.8,-1,-1.2,-1.4,-1.6, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+	# braitenbergR=[-1.6,-1.4,-1.2,-1,-0.8,-0.6,-0.4,-0.2, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+	v = 0  ###motor speed
 	for i in range(16):
 
 		Code,State,Point,ObjectHandle,SurfaceNormalVector=vrep.simxReadProximitySensor(clientID,sensor[i],vrep.simx_opmode_streaming)
 		Code,State,Point,ObjectHandle,SurfaceNormalVector=vrep.simxReadProximitySensor(clientID,sensor[i],vrep.simx_opmode_buffer)
-		time.sleep(0.1)
-		dist = math.sqrt(Point[0]**2 + Point[1]**2 + Point[2]**2)
-		if (dist < maxd):
+		# time.sleep(0.1)
+		# detect[i] = 0
+		# print("point = ",Point)
+		# dist = math.sqrt(Point[0]**2 + Point[1]**2 + Point[2]**2)
+		dist = math.sqrt(Point[0]**2 + Point[2]**2)
+
+		# if (dist < maxd and State != 1):
+		if ((State != 0) and (dist < maxd)):
+			# print("yes %d",i)
+			# print("dist x ,z ",Point[0], Point[2])
 			if(dist < mind):
 				dist = mind
 			detect[i] = 1 - ((dist - mind)/(maxd - mind))
@@ -56,15 +65,16 @@ for i in range(16):
 		s_name = robot + "_ultrasonicSensor" + str(i)
 		errorcode, sensor[i] = vrep.simxGetObjectHandle(clientID,s_name,vrep.simx_opmode_blocking)
 
+j = 0
 while(True):
 	v_left, v_right = check_collision(sensor)
 
-	print(v_left, v_right)
-
-	returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor1, v_left,vrep.simx_opmode_streaming)
-	returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor1, v_right,vrep.simx_opmode_streaming)
-
-	# time.sleep(0.2)
+	# print(v_left, v_right)
+	if j>0:
+		returnCode=vrep.simxSetJointTargetVelocity(clientID, leftMotor1, v_left,vrep.simx_opmode_streaming)
+		returnCode=vrep.simxSetJointTargetVelocity(clientID, rightMotor1, v_right,vrep.simx_opmode_streaming)
+	j = 1
+	# input()
 # print(bot_hsandle)
 
 # for i in range(1,17):
