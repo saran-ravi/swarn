@@ -1,18 +1,19 @@
 import RPi.GPIO as GPIO
 from time import sleep
 
+servo = 3
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(03, GPIO.OUT)
+GPIO.setup(servo, GPIO.OUT)
 
-pwm=GPIO.PWM(03, 50)
+pwm=GPIO.PWM(servo, 50)
 pwm.start(0)
 
 def SetAngle(angle):
 	duty = angle / 18 + 2
-	GPIO.output(03, True)
+	GPIO.output(servo, True)
 	pwm.ChangeDutyCycle(duty)
 	sleep(1)
-	GPIO.output(03, False)
+	GPIO.output(servo, False)
 	pwm.ChangeDutyCycle(0)
 
 SetAngle(90)
